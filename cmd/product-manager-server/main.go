@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/product-manager/repository"
 	"github.com/product-manager/settings"
 	"golang.org/x/exp/slog"
 	"os"
 )
 
 func init() {
-
+	repository.MustInit()
 }
 
 func main() {
