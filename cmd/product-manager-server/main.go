@@ -11,22 +11,36 @@ import (
 )
 
 func init() {
-	repository.MustInit()
-}
-
-func main() {
 	handler := &slog.HandlerOptions{}
 	jsonHandler := slog.NewJSONHandler(os.Stdout, handler)
 	logger := slog.New(jsonHandler)
 
 	logger.Info("Product server is initiating...", slog.Int("version", 1.0)) // <-
 
-	r := chi.NewRouter()
-	sttngs := settings.Settings{}
-
 	if err := godotenv.Load(); err != nil {
 		logger.Error("Error loading .env file", err)
 	}
+
+	dbConfig := settings.Database{
+		Username: os.Getenv("DATABASE_USERNAME"),
+		Password: os.Getenv("DATABASE_PASSWORD"),
+		Host:     os.Getenv("DATABASE_HOST"),
+		Port:     os.Getenv("DATABASE_PORT"),
+		Name:     os.Getenv("DATABASE_NAME"),
+	}
+
+	err := repository.MustInit(logger, dbConfig)
+	if err != nil {
+		logger.Error("Error initializing database", "error", err)
+	}
+
+}
+
+func main() {
+
+	//Initialize repositories, servicies and controllers
+	r := chi.NewRouter()
+	sttngs := settings.Settings{}
 
 	r.Route(fmt.Sprintf("%s", sttngs.Server.Context), func(r chi.Router) {
 

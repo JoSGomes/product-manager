@@ -1,7 +1,7 @@
 package settings
 
 type Database struct {
-	Name     string `envconfig:"product-postgre"`
+	Name     string `envconfig:"product-postgres"`
 	Host     string `envconfig:"default=localhost"`
 	Port     string `envconfig:"default=5432"`
 	Username string `envconfig:"default=product-admin"`
