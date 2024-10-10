@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/product-manager/settings"
 	"golang.org/x/exp/slog"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +24,7 @@ func MustInit(logger *slog.Logger, dbConfig settings.Database) error {
 		Logger: logger,
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 		dbConfig.Username,
 		dbConfig.Password,
 		dbConfig.Host,
@@ -33,7 +33,10 @@ func MustInit(logger *slog.Logger, dbConfig settings.Database) error {
 	)
 
 	var err error
-	Repo.DB, err = gorm.Open(mysql.Open(dsn))
+	Repo.DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}))
 	if err != nil {
 		Repo.Logger.Error("Failed to connect to database", "error", err)
 		return err

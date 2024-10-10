@@ -1,4 +1,4 @@
-CREATE USER products_admin;
+CREATE USER products_admin WITH PASSWORD '123qwe';
 GRANT ALL PRIVILEGES ON DATABASE products_api TO products_admin;
 
 CREATE TABLE "promotions" (
