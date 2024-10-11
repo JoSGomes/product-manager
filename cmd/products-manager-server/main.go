@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/product-manager/middleware"
 	"github.com/product-manager/repository"
 	"github.com/product-manager/settings"
 	"golang.org/x/exp/slog"
@@ -24,12 +25,12 @@ func init() {
 	var dbConfig settings.Database
 	err := envconfig.Process("DATABASE", &dbConfig)
 	if err != nil {
-		l.Error("Error initializing environment database variables", "error", err)
+		log.Fatal("Error initializing environment database variables ", "error", err)
 	}
 
 	err = repository.MustInit(l, dbConfig)
 	if err != nil {
-		l.Error("Error initializing database", "error", err)
+		log.Fatalf("Error initializing environment database variables ", "error", err)
 	}
 }
 
@@ -46,6 +47,7 @@ func main() {
 
 	//Initialize repositories, services and controllers
 	r := chi.NewRouter()
+	r.Use(middleware.LoggingMiddleware)
 
 	r.Route(fmt.Sprintf("/%s", sttngs.Server.Context), func(r chi.Router) {
 		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
