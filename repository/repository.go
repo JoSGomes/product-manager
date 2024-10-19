@@ -44,3 +44,7 @@ func MustInit(logger *slog.Logger, dbConfig settings.Database) error {
 
 	return nil
 }
+
+func GetRepository() *gorm.DB {
+	return Repo.DB
+}

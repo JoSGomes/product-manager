@@ -5,8 +5,9 @@ db-down:
 	docker compose down
 
 run-localhost:
-	export SERVER_PORT=8080
 	export SERVER_CONTEXT=product-manager
+	export SERVER_HOST=localhost
+	export SERVER_PORT=8080
 	export DATABASE_USERNAME=products_admin
 	export DATABASE_PASSWORD=123qwe
 	export DATABASE_HOST=localhost

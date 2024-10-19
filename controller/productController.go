@@ -3,6 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"github.com/product-manager/model"
+	"github.com/product-manager/service"
+	"golang.org/x/exp/slog"
 	"net/http"
 )
 
@@ -19,23 +21,30 @@ type IProductController interface {
 	DeleteProductByID(id int) error
 }
 
-func (c *controller) ReadAllProducts(w http.ResponseWriter, r *http.Request) {
+type ProductController struct {
+	ProductService service.IProductService
+	Logger         *slog.Logger
+}
+
+func (c *ProductController) ReadAllProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	c.logger.InfoContext(r.Context(), "Read")
-	lggr := c.logger.With("Controller")
+	l := c.Logger.With("Controller", "Products")
 
-	lggr.Info("Request on read all products", "request", r)
+	l.Info("Request on read all products",
+		"method", r.Method,
+		"url", r.URL.String(),
+		"header", r.Header)
 
-	products, err := c.service.ReadAllProducts()
+	products, err := c.ProductService.ReadAllProducts()
 	if err != nil {
-		lggr.Error("Failed on read all products", "error", err)
+		l.Error("Failed on read all products", "error", err)
 		http.Error(w, "Failed on read all products", http.StatusInternalServerError)
 		return
 	}
 
 	if err := json.NewEncoder(w).Encode(products); err != nil {
-		lggr.Error("Failed on marshall all products", "error", err)
+		l.Error("Failed on marshall all products", "error", err)
 		http.Error(w, "Failed on marshall all products", http.StatusInternalServerError)
 		return
 	}

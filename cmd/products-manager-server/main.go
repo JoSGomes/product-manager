@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/product-manager/controller"
 	"github.com/product-manager/middleware"
 	"github.com/product-manager/repository"
+	"github.com/product-manager/service"
 	"github.com/product-manager/settings"
 	"golang.org/x/exp/slog"
 	_ "gorm.io/gorm/logger"
@@ -45,24 +46,30 @@ func main() {
 		l.Error("Error initializing server settings", "error", err)
 	}
 
+	healthController := controller.HealthController{Logger: l}
+
+	productRepository := repository.ProductRepository{
+		Repository: repository.Repo,
+		Logger:     l,
+	}
+
+	productService := service.ProductService{
+		ProductRepository: productRepository,
+		Logger:            l,
+	}
+
+	productController := controller.ProductController{
+		ProductService: &productService,
+		Logger:         l,
+	}
+
 	//Initialize repositories, services and controllers
 	r := chi.NewRouter()
 	r.Use(middleware.LoggingMiddleware)
 
 	r.Route(fmt.Sprintf("/%s", sttngs.Server.Context), func(r chi.Router) {
-		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-
-			response, _ := json.Marshal("ok")
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				l.Error("Failed to generate JSON response", "error", err)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write(response)
-		})
+		r.Get("/health", healthController.Health)
+		r.Get("/products", productController.ReadAllProducts)
 	})
 
 	address := fmt.Sprintf("%s:%s", sttngs.Server.Host, sttngs.Server.Port)
